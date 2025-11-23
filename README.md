@@ -21,7 +21,7 @@
 
 ## 📸 Preview  
 
-<img width="100%" alt="Portfolio Screenshot" src="./public/assets/png/readme-preview-img.webp" />
+<img width="100%" alt="Portfolio Screenshot" src="./public/assets/png/readme-prev-main-img.webp" />
 
 ---
 
