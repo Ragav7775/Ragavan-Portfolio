@@ -21,7 +21,7 @@
 
 ## 📸 Preview  
 
-<img width="100%" alt="Portfolio Screenshot" src="public/src/png/readme-img.webp" />
+<img width="100%" alt="Portfolio Screenshot" src="./public/assets/png/readme-img.webp" />
 
 ---
 
@@ -84,4 +84,5 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 ⭐ **Star this repo if you like it** — it helps support my work!  
 
 ---
+
 
