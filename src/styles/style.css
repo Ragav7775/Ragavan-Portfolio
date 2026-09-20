@@ -587,7 +587,7 @@ header {
     padding: 6px 14px;
     border-radius: 20px;
     left: 100px;
-    bottom: 75px;
+    bottom: 14px;
     opacity: 0;
     pointer-events: none;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
@@ -635,8 +635,8 @@ header {
 }
 
 .logo-top img {
-    height: 48px;
-    width: 48px;
+    height: 70px;
+    width: 70px;
     object-fit: contain;
 }
 
@@ -898,11 +898,14 @@ header {
     position: relative;
     max-width: 100%;
     overflow-wrap: break-word;
+    overflow: visible;
 }
 
 .name-word {
     display: inline-flex;
     white-space: nowrap;
+    overflow: visible;
+    align-items: center;
 }
 
 .name-space {
@@ -912,6 +915,7 @@ header {
 
 .name-char {
     display: inline-block;
+    height: 50px;
     background: var(--gradient-accent);
     background-size: 300% 300%;
     background-clip: text;
@@ -923,6 +927,7 @@ header {
     animation: 4s ease infinite gradient;
     transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.35s ease;
     will-change: transform;
+    overflow: visible;
 }
 
 .name-char:hover {
