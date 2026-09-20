@@ -890,22 +890,24 @@ header {
 .name-heading {
     font-size: clamp(3.8rem, 7.5vw, 8rem);
     font-weight: 700;
-    line-height: 1.1;
+    line-height: 1.2;
+    /* Increased from 1.1 */
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     margin-bottom: 8px;
+    padding-bottom: 0.08em;
+    /* Gives descenders extra room */
     position: relative;
     max-width: 100%;
-    overflow-wrap: break-word;
     overflow: visible;
 }
 
 .name-word {
     display: inline-flex;
     white-space: nowrap;
-    overflow: visible;
-    align-items: center;
+    line-height: 1.2;
+    /* Prevents descender clipping */
 }
 
 .name-space {
@@ -915,7 +917,8 @@ header {
 
 .name-char {
     display: inline-block;
-    height: 50px;
+    line-height: 1.5;
+    /* Important for letters like g, p, y, q */
     background: var(--gradient-accent);
     background-size: 300% 300%;
     background-clip: text;
@@ -925,7 +928,9 @@ header {
     cursor: pointer;
     user-select: none;
     animation: 4s ease infinite gradient;
-    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.35s ease;
+    transition:
+        transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+        filter 0.35s ease;
     will-change: transform;
     overflow: visible;
 }
