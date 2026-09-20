@@ -1,166 +1,380 @@
-var audio = document.getElementById("audioPlayer"),
-    loader = document.getElementById("preloader");
+/**
+ * RAGAVAN PORTFOLIO — MAIN JAVASCRIPT BUNDLE
+ * Modernized, performant, accessible vanilla JavaScript architecture.
+ */
 
-/* ------------------ TOGGLE SETTINGS PANEL ------------------ */
-function settingtoggle() {
-    document.getElementById("setting-container").classList.toggle("settingactivate");
-    document.getElementById("visualmodetogglebuttoncontainer").classList.toggle("visualmodeshow");
-    document.getElementById("soundtogglebuttoncontainer").classList.toggle("soundmodeshow");
-}
+(function () {
+  "use strict";
 
-/* ------------------ PLAY/PAUSE BACKGROUND AUDIO ------------------ */
-function playpause() {
-    if (!document.getElementById("switchforsound").checked) audio.pause();
-    else audio.play();
-}
+  // -------------------------------------------------------------------------
+  // 1. DOM NODES & STATE INITIALIZATION
+  // -------------------------------------------------------------------------
+  const elements = {
+    audio: document.getElementById("audioPlayer"),
+    preloader: document.getElementById("preloader"),
+    heyBadge: document.querySelector(".hey"),
+    settingContainer: document.getElementById("setting-container"),
+    settingBtn: document.getElementById("switchforsetting"),
+    visualModeBtn: document.getElementById("switchforvisualmode"),
+    soundBtn: document.getElementById("switchforsound"),
+    hamburgerBtn: document.getElementById("hamburger-button"),
+    mobileMenu: document.getElementById("mobiletogglemenu"),
+    burgerBars: [
+      document.getElementById("burger-bar1"),
+      document.getElementById("burger-bar2"),
+      document.getElementById("burger-bar3"),
+    ],
+    navLinks: document.querySelectorAll(".navbar-tabs-ul li"),
+    mobileNavLinks: document.querySelectorAll(".mobile-navbar-tabs-ul li"),
+    sections: document.querySelectorAll("section[id]"),
+    backToTopBtn: document.getElementById("backtotopbutton"),
+    cursorInner: document.getElementById("cursor-inner"),
+    cursorOuter: document.getElementById("cursor-outer"),
+    pupils: Array.from(document.getElementsByClassName("footer-pupil")),
+  };
 
-/* ------------------ VISUAL MODE TOGGLE ------------------ */
-function visualmode() {
-    document.body.classList.toggle("light-mode");
-    document.querySelectorAll(".needtobeinvert").forEach(e => {
-        e.classList.toggle("invertapplied");
-    });
-}
-
-/* ------------------ PRELOADER ------------------ */
-window.addEventListener("load", function () {
+  // -------------------------------------------------------------------------
+  // 2. PRELOADER & INITIAL LOAD ORCHESTRATION
+  // -------------------------------------------------------------------------
+  function dismissPreloader() {
+    if (!elements.preloader) return;
+    elements.preloader.classList.add("fade-out");
     setTimeout(() => {
-        loader.style.display = "none";
-        AOS.refreshHard();     // ensures mobile/tablet correct offsets
-    }, 1500);
+      elements.preloader.style.display = "none";
+      if (elements.heyBadge) {
+        elements.heyBadge.classList.add("popup");
+      }
+      if (window.AOS) {
+        window.AOS.refresh();
+      }
+    }, 400);
+  }
 
-    document.querySelector(".hey").classList.add("popup");
-});
+  if (document.readyState === "complete") {
+    setTimeout(dismissPreloader, 600);
+  } else {
+    window.addEventListener("load", () => {
+      setTimeout(dismissPreloader, 600);
+    });
+  }
 
-/* ------------------ HAMBURGER MENU ------------------ */
-let emptyArea = document.getElementById("emptyarea"),
-    mobileTogglemenu = document.getElementById("mobiletogglemenu");
+  // -------------------------------------------------------------------------
+  // 3. THEME & VISUAL MODE (WITH LOCALSTORAGE PERSISTENCE)
+  // -------------------------------------------------------------------------
+  const THEME_STORAGE_KEY = "ragavan_portfolio_theme";
 
-function hamburgerMenu() {
-    document.body.classList.toggle("stopscrolling");
+  function initTheme() {
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme === "light") {
+      document.body.classList.add("light-mode");
+    }
+  }
 
-    mobileTogglemenu.classList.toggle("show-toggle-menu");
-    document.getElementById("burger-bar1").classList.toggle("hamburger-animation1");
-    document.getElementById("burger-bar2").classList.toggle("hamburger-animation2");
-    document.getElementById("burger-bar3").classList.toggle("hamburger-animation3");
-}
+  function toggleVisualMode() {
+    document.body.classList.toggle("light-mode");
+    const isLight = document.body.classList.contains("light-mode");
+    localStorage.setItem(THEME_STORAGE_KEY, isLight ? "light" : "dark");
+  }
 
-function hidemenubyli() {
+  if (elements.visualModeBtn) {
+    elements.visualModeBtn.addEventListener("click", toggleVisualMode);
+  }
+  initTheme();
+
+  // -------------------------------------------------------------------------
+  // 4. SETTINGS PANEL TOGGLE
+  // -------------------------------------------------------------------------
+  function toggleSettings() {
+    if (!elements.settingContainer || !elements.settingBtn) return;
+    const isExpanded = elements.settingContainer.classList.toggle("settingactivate");
+    elements.settingBtn.setAttribute("aria-expanded", String(isExpanded));
+  }
+
+  if (elements.settingBtn) {
+    elements.settingBtn.addEventListener("click", toggleSettings);
+  }
+
+  // -------------------------------------------------------------------------
+  // 5. BACKGROUND AUDIO CONTROLS (SAFE PROMISE HANDLING)
+  // -------------------------------------------------------------------------
+  let isAudioPlaying = false;
+
+  function toggleSound() {
+    if (!elements.audio || !elements.soundBtn) return;
+
+    if (isAudioPlaying) {
+      elements.audio.pause();
+      isAudioPlaying = false;
+      elements.soundBtn.classList.remove("sound-active");
+      elements.soundBtn.setAttribute("aria-pressed", "false");
+    } else {
+      elements.audio
+        .play()
+        .then(() => {
+          isAudioPlaying = true;
+          elements.soundBtn.classList.add("sound-active");
+          elements.soundBtn.setAttribute("aria-pressed", "true");
+        })
+        .catch(() => {
+          // Playback blocked by browser policy
+          isAudioPlaying = false;
+          elements.soundBtn.classList.remove("sound-active");
+          elements.soundBtn.setAttribute("aria-pressed", "false");
+        });
+    }
+  }
+
+  if (elements.soundBtn) {
+    elements.soundBtn.addEventListener("click", toggleSound);
+  }
+
+  // -------------------------------------------------------------------------
+  // 6. HAMBURGER MENU & ACCESSIBLE DRAWER
+  // -------------------------------------------------------------------------
+  function openMobileMenu() {
+    if (!elements.mobileMenu || !elements.hamburgerBtn) return;
+    elements.mobileMenu.classList.add("show-toggle-menu");
+    elements.mobileMenu.setAttribute("aria-hidden", "false");
+    elements.hamburgerBtn.setAttribute("aria-expanded", "true");
+    document.body.classList.add("stopscrolling");
+
+    if (elements.burgerBars[0]) elements.burgerBars[0].classList.add("hamburger-animation1");
+    if (elements.burgerBars[1]) elements.burgerBars[1].classList.add("hamburger-animation2");
+    if (elements.burgerBars[2]) elements.burgerBars[2].classList.add("hamburger-animation3");
+  }
+
+  function closeMobileMenu() {
+    if (!elements.mobileMenu || !elements.hamburgerBtn) return;
+    elements.mobileMenu.classList.remove("show-toggle-menu");
+    elements.mobileMenu.setAttribute("aria-hidden", "true");
+    elements.hamburgerBtn.setAttribute("aria-expanded", "false");
     document.body.classList.remove("stopscrolling");
 
-    mobileTogglemenu.classList.remove("show-toggle-menu");
-    document.getElementById("burger-bar1").classList.remove("hamburger-animation1");
-    document.getElementById("burger-bar2").classList.remove("hamburger-animation2");
-    document.getElementById("burger-bar3").classList.remove("hamburger-animation3");
-}
+    if (elements.burgerBars[0]) elements.burgerBars[0].classList.remove("hamburger-animation1");
+    if (elements.burgerBars[1]) elements.burgerBars[1].classList.remove("hamburger-animation2");
+    if (elements.burgerBars[2]) elements.burgerBars[2].classList.remove("hamburger-animation3");
+  }
 
-/* ------------------ SCROLL SPY (THROTTLED) ------------------ */
-const sections = document.querySelectorAll("section"),
-    navLi = document.querySelectorAll(".navbar .navbar-tabs .navbar-tabs-ul li"),
-    mobilenavLi = document.querySelectorAll(".mobiletogglemenu .mobile-navbar-tabs-ul li");
+  function toggleMobileMenu() {
+    const isOpen = elements.mobileMenu?.classList.contains("show-toggle-menu");
+    if (isOpen) {
+      closeMobileMenu();
+    } else {
+      openMobileMenu();
+    }
+  }
 
-function throttle(fn, delay) {
-    let lastCall = 0;
-    return function (...args) {
-        const now = new Date().getTime();
-        if (now - lastCall < delay) return;
-        lastCall = now;
-        fn(...args);
+  if (elements.hamburgerBtn) {
+    elements.hamburgerBtn.addEventListener("click", toggleMobileMenu);
+  }
+
+  // Close drawer when clicking any mobile navigation link
+  elements.mobileNavLinks.forEach((item) => {
+    item.addEventListener("click", closeMobileMenu);
+  });
+
+  // Close drawer on Escape key press
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && elements.mobileMenu?.classList.contains("show-toggle-menu")) {
+      closeMobileMenu();
+    }
+  });
+
+  // -------------------------------------------------------------------------
+  // 7. HIGH-PERFORMANCE SCROLL SPY VIA INTERSECTIONOBSERVER
+  // -------------------------------------------------------------------------
+  function updateActiveNav(activeId) {
+    if (!activeId) return;
+
+    elements.navLinks.forEach((li) => {
+      const link = li.querySelector("a");
+      const target = link?.getAttribute("href")?.replace("#", "");
+      li.classList.toggle("activeThistab", target === activeId);
+    });
+
+    elements.mobileNavLinks.forEach((li) => {
+      const link = li.querySelector("a");
+      const target = link?.getAttribute("href")?.replace("#", "");
+      li.classList.toggle("activeThismobiletab", target === activeId);
+    });
+  }
+
+  if ("IntersectionObserver" in window && elements.sections.length > 0) {
+    const observerOptions = {
+      root: null,
+      rootMargin: "-20% 0px -60% 0px",
+      threshold: 0,
     };
-}
 
-window.addEventListener("scroll", throttle(() => {
-    let activeId = "";
-
-    sections.forEach(sec => {
-        if (pageYOffset >= sec.offsetTop - 200) {
-            activeId = sec.getAttribute("id");
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          updateActiveNav(entry.target.getAttribute("id"));
         }
+      });
+    }, observerOptions);
+
+    elements.sections.forEach((section) => {
+      sectionObserver.observe(section);
     });
+  }
 
-    mobilenavLi.forEach(li => {
-        li.classList.toggle("activeThismobiletab", li.classList.contains(activeId));
+  // -------------------------------------------------------------------------
+  // 8. BACK TO TOP BUTTON
+  // -------------------------------------------------------------------------
+  let isScrolling = false;
+
+  function handleScrollBackToTop() {
+    if (!isScrolling) {
+      window.requestAnimationFrame(() => {
+        if (window.scrollY > 400) {
+          elements.backToTopBtn?.classList.add("is-visible");
+        } else {
+          elements.backToTopBtn?.classList.remove("is-visible");
+        }
+        isScrolling = false;
+      });
+      isScrolling = true;
+    }
+  }
+
+  window.addEventListener("scroll", handleScrollBackToTop, { passive: true });
+
+  if (elements.backToTopBtn) {
+    elements.backToTopBtn.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     });
+  }
 
-    navLi.forEach(li => {
-        li.classList.toggle("activeThistab", li.classList.contains(activeId));
-    });
+  // -------------------------------------------------------------------------
+  // 9. HIGH-PERFORMANCE CUSTOM CURSOR (RAF & NO EVENT LISTENER LEAKS)
+  // -------------------------------------------------------------------------
+  const isFinePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
-    AOS.refresh(); // keeps animations accurate
-}, 100));
+  if (isFinePointer && elements.cursorInner && elements.cursorOuter) {
+    let mouseX = -100;
+    let mouseY = -100;
+    let outerX = -100;
+    let outerY = -100;
 
-/* ------------------ BACK TO TOP BUTTON ------------------ */
-let mybutton = document.getElementById("backtotopbutton");
+    window.addEventListener(
+      "mousemove",
+      (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      },
+      { passive: true }
+    );
 
-window.addEventListener("scroll", () => {
-    if (document.documentElement.scrollTop > 400) mybutton.style.display = "block";
-    else mybutton.style.display = "none";
-});
+    function animateCursor() {
+      // Inner cursor snaps directly
+      elements.cursorInner.style.left = `${mouseX}px`;
+      elements.cursorInner.style.top = `${mouseY}px`;
 
-function scrolltoTopfunction() {
-    document.body.scrollTop = 0;
-    document.documentElement.scrollTop = 0;
-}
+      // Outer cursor follows with smooth lerp
+      outerX += (mouseX - outerX) * 0.15;
+      outerY += (mouseY - outerY) * 0.15;
+      elements.cursorOuter.style.left = `${outerX}px`;
+      elements.cursorOuter.style.top = `${outerY}px`;
 
-/* ------------------ DISABLE IMAGE RIGHT-CLICK ------------------ */
-document.addEventListener("contextmenu", function (e) {
-    if (e.target.nodeName === "IMG") e.preventDefault();
-});
+      requestAnimationFrame(animateCursor);
+    }
+    requestAnimationFrame(animateCursor);
 
-/* ------------------ FOOTER EYE ANIMATION (DESKTOP + MOBILE) ------------------ */
-let Pupils = document.getElementsByClassName("footer-pupil"),
-    pupilsArr = Array.from(Pupils),
-    pupilStartPoint = -10,
-    pupilRangeX = 20,
-    pupilRangeY = 15,
-    mouseXStartPoint = 0,
-    mouseXEndPoint = window.innerWidth,
-    mouseYEndPoint = window.innerHeight,
-    mouseXRange = mouseXEndPoint - mouseXStartPoint;
+    // Event delegation for cursor hover states (zero memory leaks)
+    document.addEventListener(
+      "mouseover",
+      (e) => {
+        const target = e.target;
+        if (target.closest("a, button, input, label, .tech-stack-box, .project-box")) {
+          elements.cursorInner.classList.add("hover");
+          elements.cursorOuter.classList.add("hover");
+        }
+      },
+      { passive: true }
+    );
 
-const mouseMove = e => {
-    const clientX = e.clientX;
-    const clientY = e.clientY;
+    document.addEventListener(
+      "mouseout",
+      (e) => {
+        const target = e.target;
+        if (target.closest("a, button, input, label, .tech-stack-box, .project-box")) {
+          elements.cursorInner.classList.remove("hover");
+          elements.cursorOuter.classList.remove("hover");
+        }
+      },
+      { passive: true }
+    );
+  }
 
-    let fracXValue = (clientX - mouseXStartPoint) / mouseXRange;
-    let fracYValue = clientY / mouseYEndPoint;
+  // -------------------------------------------------------------------------
+  // 10. FOOTER PUPIL TRACKING (DESKTOP + TOUCH)
+  // -------------------------------------------------------------------------
+  if (elements.pupils.length > 0) {
+    const pupilRangeX = 14;
+    const pupilRangeY = 10;
+    let targetPupilX = 0;
+    let targetPupilY = 0;
+    let pupilRafId = null;
 
-    let pupilX = pupilStartPoint + fracXValue * pupilRangeX;
-    let pupilY = pupilStartPoint + fracYValue * pupilRangeY;
+    function updatePupilPosition() {
+      elements.pupils.forEach((pupil) => {
+        pupil.style.transform = `translate(${targetPupilX}px, ${targetPupilY}px)`;
+      });
+      pupilRafId = null;
+    }
 
-    pupilsArr.forEach(pupil => {
-        pupil.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
-    });
-};
+    function calculatePupils(clientX, clientY) {
+      const fracX = clientX / window.innerWidth;
+      const fracY = clientY / window.innerHeight;
 
-const windowResize = () => {
-    mouseXEndPoint = window.innerWidth;
-    mouseYEndPoint = window.innerHeight;
-    mouseXRange = mouseXEndPoint - mouseXStartPoint;
-};
+      targetPupilX = (fracX - 0.5) * pupilRangeX * 2;
+      targetPupilY = (fracY - 0.5) * pupilRangeY * 2;
 
-window.addEventListener("mousemove", mouseMove);
-window.addEventListener("resize", windowResize);
-window.addEventListener("orientationchange", windowResize);
+      if (!pupilRafId) {
+        pupilRafId = requestAnimationFrame(updatePupilPosition);
+      }
+    }
 
-/* Mobile touch support */
-window.addEventListener("touchmove", e => {
-    const t = e.touches[0];
-    mouseMove({ clientX: t.clientX, clientY: t.clientY });
-});
+    window.addEventListener(
+      "mousemove",
+      (e) => {
+        calculatePupils(e.clientX, e.clientY);
+      },
+      { passive: true }
+    );
 
-window.addEventListener("touchstart", e => {
-    const t = e.touches[0];
-    mouseMove({ clientX: t.clientX, clientY: t.clientY });
-});
+    window.addEventListener(
+      "touchmove",
+      (e) => {
+        if (e.touches && e.touches[0]) {
+          calculatePupils(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      },
+      { passive: true }
+    );
+  }
 
-/* ------------------ AOS STABILITY FIXES ------------------ */
-window.addEventListener("resize", () => AOS.refresh());
-window.addEventListener("orientationchange", () => {
-    setTimeout(() => AOS.refreshHard(), 300);
-});
-
-/* Final guaranteed mobile/tablet fix */
-window.addEventListener("load", () => {
-    setTimeout(() => AOS.refreshHard(), 500);
-});
+  // -------------------------------------------------------------------------
+  // 11. RESIZE & ORIENTATION HANDLING
+  // -------------------------------------------------------------------------
+  let resizeTimeout;
+  window.addEventListener(
+    "resize",
+    () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        if (window.innerWidth >= 1024) {
+          closeMobileMenu();
+        }
+        if (window.AOS) {
+          window.AOS.refresh();
+        }
+      }, 200);
+    },
+    { passive: true }
+  );
+})();
